@@ -2,7 +2,7 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { CurrentGameService } from '../../ongoing-game/current-game.service';
 import { Subscription } from 'rxjs';
 
-interface CancelToken { cancelled: boolean; }
+interface CancelToken { cancelled: boolean; fadeTimer?: ReturnType<typeof setTimeout>; }
 interface EmojiThrownEvent { targetPlayerId: string; emoji: string; }
 
 function bezier(p0: number, p1: number, p2: number, p3: number, t: number): number {
@@ -39,13 +39,16 @@ export class EmojiAnimationComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
-    this.activeTokens.forEach(token => { token.cancelled = true; });
+    this.activeTokens.forEach(token => {
+      token.cancelled = true;
+      if (token.fadeTimer !== undefined) clearTimeout(token.fadeTimer);
+    });
     this.activeTokens.clear();
     this.overlayRef.nativeElement.innerHTML = '';
   }
 
   throwEmoji(targetPlayerId: string, emoji: string): void {
-    const targetCard = document.querySelector(`[data-player-id="${targetPlayerId}"]`) as HTMLElement | null;
+    const targetCard = document.querySelector(`[data-player-id="${CSS.escape(targetPlayerId)}"]`) as HTMLElement | null;
     if (!targetCard) return;
 
     const rect = targetCard.getBoundingClientRect();
@@ -128,7 +131,7 @@ export class EmojiAnimationComponent implements OnInit, OnDestroy {
         // Fade: CSS transition handles the visual, setTimeout cleans up DOM
         el.style.transition = 'opacity 0.4s ease';
         el.style.opacity = '0';
-        setTimeout(() => {
+        token.fadeTimer = setTimeout(() => {
           if (!token.cancelled) el.remove();
           this.activeTokens.delete(token);
         }, 400);
