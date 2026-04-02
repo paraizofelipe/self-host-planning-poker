@@ -1,5 +1,6 @@
 import errno
 import os
+import re
 import sys
 import uuid
 
@@ -162,6 +163,31 @@ def end_turn():
     emit('state', state, to=game_id, json=True)
     emit('info', info, to=game_id, json=True)
     emit('new_game', to=game_id)
+
+
+_ALLOWED_EMOJIS = {'👍', '👎', '💩', '💸', '🚀', '🎉', '🧻', '🌵', '✈️', '🧨', '🪓'}
+_UUID_RE = re.compile(r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+
+
+@socketio.event
+def throw_emoji(data):
+    game_id = session.get('game_id')
+    if not game_id:
+        return
+
+    if not isinstance(data, dict):
+        return
+
+    emoji = data.get('emoji')
+    target_player_id = data.get('targetPlayerId')
+
+    if emoji not in _ALLOWED_EMOJIS:
+        return
+    if not isinstance(target_player_id, str) or not _UUID_RE.match(target_player_id):
+        return
+
+    sanitized = {'emoji': emoji, 'targetPlayerId': target_player_id}
+    emit('emoji_thrown', sanitized, to=game_id, include_self=True, json=True)
 
 
 @socketio.on_error()
