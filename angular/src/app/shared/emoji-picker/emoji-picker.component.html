@@ -1,0 +1,9 @@
+<div class="emoji-picker">
+  <button
+    *ngFor="let emoji of emojis"
+    class="emoji-button"
+    (click)="selectEmoji(emoji)"
+    [attr.aria-label]="'Throw ' + emoji">
+    {{ emoji }}
+  </button>
+</div>

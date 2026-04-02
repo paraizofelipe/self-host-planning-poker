@@ -1,3 +1,7 @@
+.card-container {
+  position: relative;
+}
+
 .face-down {
   background-color: var(--card-color);
   outline-offset: -5px;

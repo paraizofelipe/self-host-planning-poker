@@ -1,6 +1,7 @@
 <div class="container flex-grow-1 d-flex justify-content-evenly flex-wrap align-items-center">
   <shpp-player-hand *ngFor="let player of (state | keyvalue); trackBy: getId"
                     [playerState]="player.value"
+                    [playerId]="player.key"
                     [deck]="deck">
   </shpp-player-hand>
 </div>

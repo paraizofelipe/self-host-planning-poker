@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CurrentGameService } from '../../ongoing-game/current-game.service';
 import { Subscription } from 'rxjs';
 
@@ -28,12 +28,12 @@ export class EmojiAnimationComponent implements OnInit, OnDestroy {
   private subscription?: Subscription;
   private activeTokens = new Set<CancelToken>();
 
-  constructor(private currentGameService: CurrentGameService) {}
+  constructor(private currentGameService: CurrentGameService, private ngZone: NgZone) {}
 
   ngOnInit(): void {
     this.subscription = this.currentGameService.onEmojiThrown()
       .subscribe((data: EmojiThrownEvent) => {
-        this.throwEmoji(data.targetPlayerId, data.emoji);
+        this.ngZone.runOutsideAngular(() => this.throwEmoji(data.targetPlayerId, data.emoji));
       });
   }
 
@@ -90,20 +90,19 @@ export class EmojiAnimationComponent implements OnInit, OnDestroy {
     const DURATIONS = { arc: 700, mini: 220, b1: 280, b2: 200 };
     type Phase = 'arc' | 'mini' | 'b1' | 'b2' | 'fade';
     let phase: Phase = 'arc';
-    let phaseStart = -1;
+    let phaseStart = performance.now();
 
-    const step = (now: DOMHighResTimeStamp): void => {
+    const step = (): void => {
       if (token.cancelled) return;
 
-      if (phaseStart < 0) phaseStart = now;
-      const elapsed = now - phaseStart;
+      const elapsed = performance.now() - phaseStart;
 
       if (phase === 'arc') {
         const t = Math.min(elapsed / DURATIONS.arc, 1);
         el.style.left = bezier(startX, cp1x, cp2x, hitX, t) + 'px';
         el.style.top  = bezier(startY, cp1y, cp2y, hitY, t) + 'px';
         if (t < 1) { requestAnimationFrame(step); return; }
-        phase = 'mini'; phaseStart = -1;
+        phase = 'mini'; phaseStart = performance.now();
         requestAnimationFrame(step);
 
       } else if (phase === 'mini') {
@@ -111,7 +110,7 @@ export class EmojiAnimationComponent implements OnInit, OnDestroy {
         el.style.left = quad(hitX, miniPeakX, floor1X, t) + 'px';
         el.style.top  = quad(hitY, miniPeakY, floorY, t) + 'px';
         if (t < 1) { requestAnimationFrame(step); return; }
-        phase = 'b1'; phaseStart = -1;
+        phase = 'b1'; phaseStart = performance.now();
         requestAnimationFrame(step);
 
       } else if (phase === 'b1') {
@@ -119,7 +118,7 @@ export class EmojiAnimationComponent implements OnInit, OnDestroy {
         el.style.left = (floor1X + (floor2X - floor1X) * t) + 'px';
         el.style.top  = (floorY - 4 * b1h * t * (1 - t)) + 'px';
         if (t < 1) { requestAnimationFrame(step); return; }
-        phase = 'b2'; phaseStart = -1;
+        phase = 'b2'; phaseStart = performance.now();
         requestAnimationFrame(step);
 
       } else if (phase === 'b2') {
@@ -128,7 +127,6 @@ export class EmojiAnimationComponent implements OnInit, OnDestroy {
         el.style.top  = (floorY - 4 * b2h * t * (1 - t)) + 'px';
         if (t < 1) { requestAnimationFrame(step); return; }
         phase = 'fade';
-        // Fade: CSS transition handles the visual, setTimeout cleans up DOM
         el.style.transition = 'opacity 0.4s ease';
         el.style.opacity = '0';
         token.fadeTimer = setTimeout(() => {

@@ -11,6 +11,7 @@ import { NavPlayerInfoComponent } from '../navigation-bar/player-info/nav-player
 import { NavGameInfoComponent } from '../navigation-bar/game-info/nav-game-info.component';
 import { NavGameNameComponent } from '../navigation-bar/game-name/nav-game-name.component';
 import { ContainerComponent } from '../shared/container/container.component';
+import { EmojiAnimationComponent } from '../shared/emoji-animation/emoji-animation.component';
 
 @Component({
     selector: 'shpp-ongoing-game-page',
@@ -25,7 +26,8 @@ import { ContainerComponent } from '../shared/container/container.component';
       CardTableComponent,
       NgIf,
       TurnSummaryComponent,
-      CardPickerComponent
+      CardPickerComponent,
+      EmojiAnimationComponent
     ]
 })
 export default class OngoingGamePageComponent implements OnDestroy {

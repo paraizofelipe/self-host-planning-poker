@@ -1,0 +1,56 @@
+.emoji-picker {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.85);
+  padding: 8px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  animation: slideIn 0.2s ease-out;
+
+  /* Add padding to the hover area */
+  &::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -10px;
+    z-index: -1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.emoji-button {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: transform 0.15s ease, background-color 0.15s ease;
+  line-height: 1;
+}
+
+.emoji-button:hover {
+  transform: scale(1.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.emoji-button:active {
+  transform: scale(1.1);
+}
