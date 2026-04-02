@@ -1,0 +1,10 @@
+version: "3"
+services:
+  planning-poker:
+    image: axeleroy/self-host-planning-poker:latest
+    ports:
+      - 8000:8000
+    volumes:
+      - planning-poker-data:/data
+volumes:
+  planning-poker-data: {}
