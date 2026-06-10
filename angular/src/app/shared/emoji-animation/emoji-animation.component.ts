@@ -78,8 +78,13 @@ export class EmojiAnimationComponent implements OnInit, OnDestroy {
     const floor3X = floor2X + (fromLeft ? -18 : 18);
 
     const el = document.createElement('div');
-    el.className = 'flying-emoji';
     el.textContent = emoji;
+    el.style.position = 'absolute';
+    el.style.fontSize = '24px';
+    el.style.pointerEvents = 'none';
+    el.style.transform = 'translate(-50%, -50%)';
+    el.style.filter = 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))';
+    el.style.userSelect = 'none';
     el.style.left = startX + 'px';
     el.style.top = startY + 'px';
     this.overlayRef.nativeElement.appendChild(el);
